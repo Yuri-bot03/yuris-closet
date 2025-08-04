@@ -1,0 +1,180 @@
+/* Yuri's Closet Inventory System Styles */
+
+/* Color palette */
+:root {
+  --primary-green: #3a6351;
+  --accent-gold: #d4a373;
+  --soft-pink: #f5d5d9;
+  --background-light: #f9faf9;
+  --text-dark: #1e2a24;
+  --border-color: #e5e5e5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--background-light);
+  color: var(--text-dark);
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  background: linear-gradient(135deg, var(--soft-pink) 0%, var(--accent-gold) 100%);
+  color: var(--primary-green);
+  padding: 1rem 2rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+header .tagline {
+  font-size: 1rem;
+  margin-top: 0.25rem;
+  color: var(--primary-green);
+}
+
+main {
+  flex: 1;
+  padding: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+h2, h3 {
+  color: var(--primary-green);
+}
+
+/* Inventory Status */
+.inventory-status {
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.inventory-count {
+  font-weight: bold;
+  color: var(--accent-gold);
+}
+
+/* Forms */
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+label {
+  flex-basis: 100%;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+select, input[type="number"], input[type="password"] {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  flex-grow: 1;
+  min-width: 120px;
+}
+
+button {
+  background-color: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+}
+
+button:hover {
+  background-color: var(--accent-gold);
+  color: var(--primary-green);
+}
+
+.message {
+  margin-top: 0.5rem;
+  font-style: italic;
+  color: var(--primary-green);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+th {
+  background-color: var(--soft-pink);
+  color: var(--primary-green);
+  font-weight: 600;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: var(--background-light);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Extra features list */
+.extra-features ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.extra-features li {
+  margin-bottom: 0.5rem;
+}
+
+/* Admin login */
+.hidden {
+  display: none;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: var(--primary-green);
+  color: white;
+  font-size: 0.9rem;
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yuri's Closet – Inventory</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Yuri's Closet</h1>
+    <p class="tagline">Inventory Management – Worker</p>
+  </header>
+
+  <main id="worker">
+    <section class="inventory-status">
+      <h2>Current Inventory</h2>
+      <div class="status-item">
+        <span class="price-label">₱69 Items:</span>
+        <span id="inventory-69" class="inventory-count">0</span>
+      </div>
+      <div class="status-item">
+        <span class="price-label">₱99 Items:</span>
+        <span id="inventory-99" class="inventory-count">0</span>
+      </div>
+    </section>
+
+    <section class="sales-entry">
+      <h2>Record a Sale</h2>
+      <form id="sale-form">
+        <label for="sale-price">Select Price:</label>
+        <select id="sale-price" name="salePrice" required>
+          <option value="69">₱69</option>
+          <option value="99">₱99</option>
+        </select>
+
+        <label for="sale-quantity">Quantity:</label>
+        <input type="number" id="sale-quantity" name="saleQuantity" min="1" value="1" required>
+
+        <button type="submit">Submit Sale</button>
+      </form>
+      <p id="sale-message" class="message"></p>
+    </section>
+
+    <section class="admin-link">
+      <p>Admin? <a href="admin.html">Go to Admin Dashboard</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; <span id="year"></span> Yuri's Closet. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
