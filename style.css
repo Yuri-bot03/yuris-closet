@@ -33,6 +33,15 @@ header {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Logo styling: displayed above the title and centered */
+.logo {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  margin: 0 auto 0.5rem auto;
+  display: block;
+}
+
 header h1 {
   margin: 0;
   font-size: 2rem;
@@ -116,6 +125,12 @@ button {
 button:hover {
   background-color: var(--accent-gold);
   color: var(--primary-green);
+}
+
+/* Export button shares base styling but aligns to the left with some margin */
+.export-button {
+  display: inline-block;
+  margin-top: 0.5rem;
 }
 
 .message {

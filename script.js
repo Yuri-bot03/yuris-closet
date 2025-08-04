@@ -85,6 +85,8 @@ function initWorkerPage() {
       e.preventDefault();
       const price = parseInt(document.getElementById('sale-price').value, 10);
       const quantity = parseInt(document.getElementById('sale-quantity').value, 10);
+      const moneyReceivedInput = document.getElementById('money-received');
+      const moneyReceived = moneyReceivedInput ? parseFloat(moneyReceivedInput.value) : NaN;
       const current = getInventory(price);
       if (quantity <= 0) {
         saleMessage.textContent = 'Please enter a valid quantity.';
@@ -94,6 +96,13 @@ function initWorkerPage() {
         saleMessage.textContent = `Not enough inventory for ₱${price}. Currently available: ${current}.`;
         return;
       }
+      // Calculate total price and ensure money received is sufficient
+      const totalPrice = price * quantity;
+      if (isNaN(moneyReceived) || moneyReceived < totalPrice) {
+        saleMessage.textContent = `Insufficient amount received. Total is ₱${totalPrice}.`;
+        return;
+      }
+      const change = moneyReceived - totalPrice;
       const newInventory = current - quantity;
       setInventory(price, newInventory);
       // Determine the date in the store's timezone (America/Denver).  This avoids
@@ -112,9 +121,10 @@ function initWorkerPage() {
         dateKey: dateKey
       };
       addSaleRecord(record);
-      saleMessage.textContent = `Sale recorded! Sold ${quantity} item(s) at ₱${price}.`;
-      // Reset quantity to 1
+      saleMessage.textContent = `Sale recorded! Sold ${quantity} item(s) at ₱${price}. Change: ₱${change.toFixed(2)}.`;
+      // Reset fields
       document.getElementById('sale-quantity').value = 1;
+      if (moneyReceivedInput) moneyReceivedInput.value = '';
       updateWorkerInventoryDisplay();
     });
   }
@@ -160,6 +170,7 @@ function loadAdminData() {
   populateHistoryTable();
   populateDailyTable();
   setupStockForm();
+  setupExportButton();
 }
 
 function updateAdminInventoryDisplay() {
@@ -235,4 +246,37 @@ function setupStockForm() {
       updateAdminInventoryDisplay();
     });
   }
+}
+
+/**
+ * Attach a click handler to the Export CSV button. When clicked the current
+ * sales records will be downloaded as a CSV file. If there are no records
+ * an alert will be shown instead.
+ */
+function setupExportButton() {
+  const exportBtn = document.getElementById('export-csv');
+  if (!exportBtn) return;
+  exportBtn.addEventListener('click', () => {
+    const records = getSalesRecords();
+    if (!records || records.length === 0) {
+      alert('There are no sales records to export.');
+      return;
+    }
+    // Build CSV header
+    let csv = 'Date/Time,Price,Quantity,Total\n';
+    records.forEach(record => {
+      const date = new Date(record.timestamp).toLocaleString();
+      const total = record.price * record.quantity;
+      csv += `${date},${record.price},${record.quantity},${total}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'sales_records.csv';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  });
 }

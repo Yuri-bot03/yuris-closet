@@ -1,13 +1,13 @@
 # Yuri's Closet Inventory System
 
-This repository contains a simple inventory-management web application for **Yuri's Closet**, designed to run entirely on GitHub Pages.  The goal is to provide store workers with an easy way to record sales and to give the owner (the admin) a private dashboard for tracking stock levels and daily sales totals.  The aesthetic is inspired by green, gold, and soft pink tones to reflect the warm and chic vibe of Yuri's Closet.
+This repository contains a simple inventory‑management and point‑of‑sale (POS) web application for **Yuri's Closet**, designed to run entirely on GitHub Pages.  The goal is to provide store workers with an easy way to record sales — including the amount paid and any change due — and to give the owner (the admin) a private dashboard for tracking stock levels and daily sales totals.  The aesthetic is inspired by green, gold and soft pink tones and features a custom floral logo to reflect the warm and chic vibe of Yuri's Closet.
 
 ## Features
 
 ### Worker Interface (`index.html`)
 
 - **View Current Inventory:**  See how many items remain at two fixed price points – ₱69 and ₱99.
-- **Record Sales:**  Workers can quickly record a sale by selecting the price and quantity sold.  The app automatically deducts stock and logs the sale with a timestamp.
+- **Record Sales:**  Workers can quickly record a sale by selecting the price and quantity sold **and entering the amount of money received**.  The app automatically deducts stock, logs the sale with a timestamp and calculates the customer’s change.
 - **Validation:**  The form prevents recording more items than are currently in stock and provides helpful messages when something is amiss.
 - **Local Persistence:**  Inventory counts and sales history are stored in the browser’s `localStorage`, so data persists between page reloads on the same machine.
 
@@ -17,7 +17,8 @@ This repository contains a simple inventory-management web application for **Yur
 - **Manage Stock:**  Easily add new items to the ₱69 or ₱99 inventory.
 - **Purchase History:**  View a table of all recorded sales, including date/time, price, quantity, and transaction total.
 - **Daily Gross Sales:**  The dashboard aggregates sales by date and displays the total revenue for each day.
-- **Ideas for Enhancement:**  The admin page lists several suggested improvements for future versions, such as exporting data to CSV, adding user accounts, and generating charts.
+- **Export CSV:**  Download the complete sales log as a CSV file for accounting and analysis.
+- **Ideas for Enhancement:**  The admin page lists several suggested improvements for future versions, such as adding user accounts and generating charts.
 
 ## How It Works
 
@@ -46,7 +47,6 @@ By default the inventory counts start at zero.  As the administrator, log in to 
 
 ## Suggested Future Improvements
 
-- **Data Export:**  Provide an option to download the sales log as a CSV file for accounting purposes.
 - **User Accounts:**  Implement worker accounts with individual logins to track who recorded each sale.
 - **Inventory Categories:**  Track stock by item type, size, or color for more granular reporting.
 - **Responsive Charts:**  Visualize daily or weekly sales trends using chart libraries (e.g. Chart.js).
