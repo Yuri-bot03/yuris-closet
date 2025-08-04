@@ -1,6 +1,6 @@
 # Yuri's Closet Inventory System
 
-This repository contains a simple inventory‑management and point‑of‑sale (POS) web application for **Yuri's Closet**, designed to run entirely on GitHub Pages.  The goal is to provide store workers with an easy way to record sales — including the amount paid and any change due — and to give the owner (the admin) a private dashboard for tracking stock levels and daily sales totals.  The aesthetic is inspired by green, gold and soft pink tones and features a custom floral logo to reflect the warm and chic vibe of Yuri's Closet.
+This repository contains a simple inventory‑management and point‑of‑sale (POS) web application for **Yuri's Closet**, designed to run entirely on GitHub Pages.  The goal is to provide store workers with an easy way to record sales — including the amount paid and any change due — and to give the owner (the admin) a private dashboard for tracking stock levels and daily sales totals.  The app uses a pastel gradient and soft hues inspired by green, gold and pink tones (similar to the WorkMotivation project) rather than any specific logo.
 
 ## Features
 
@@ -18,7 +18,6 @@ This repository contains a simple inventory‑management and point‑of‑sale (
 - **Purchase History:**  View a table of all recorded sales, including date/time, price, quantity, and transaction total.
 - **Daily Gross Sales:**  The dashboard aggregates sales by date and displays the total revenue for each day.
 - **Export CSV:**  Download the complete sales log as a CSV file for accounting and analysis.
-- **Ideas for Enhancement:**  The admin page lists several suggested improvements for future versions, such as adding user accounts and generating charts.
 
 ## How It Works
 

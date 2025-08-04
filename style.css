@@ -2,12 +2,16 @@
 
 /* Color palette */
 :root {
+  /* Primary brand colours */
   --primary-green: #3a6351;
   --accent-gold: #d4a373;
   --soft-pink: #f5d5d9;
   --background-light: #f9faf9;
   --text-dark: #1e2a24;
   --border-color: #e5e5e5;
+  /* Gradient colours inspired by WorkMotivation design */
+  --gradient-start: #e6e9ff;
+  --gradient-end: #fce1f0;
 }
 
 * {
@@ -17,7 +21,8 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--background-light);
+  /* Use a soft gradient background for a modern feel */
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
   color: var(--text-dark);
   line-height: 1.4;
   display: flex;
@@ -26,27 +31,22 @@ body {
 }
 
 header {
-  background: linear-gradient(135deg, var(--soft-pink) 0%, var(--accent-gold) 100%);
+  /* Remove the coloured banner and allow the gradient body to show through */
+  background: transparent;
   color: var(--primary-green);
-  padding: 1rem 2rem;
+  padding: 1.5rem 2rem;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 /* Logo styling: displayed above the title and centered */
-.logo {
-  width: 90px;
-  height: 90px;
-  object-fit: contain;
-  margin: 0 auto 0.5rem auto;
-  display: block;
-}
+/* Logo removed per user request */
 
 header h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
   letter-spacing: 1px;
+  color: var(--primary-green);
 }
 
 header .tagline {
@@ -57,9 +57,12 @@ header .tagline {
 
 main {
   flex: 1;
-  padding: 1.5rem;
-  max-width: 900px;
-  margin: 0 auto;
+  padding: 2rem;
+  max-width: 960px;
+  margin: 2rem auto;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 h2, h3 {
