@@ -25,26 +25,37 @@
       </div>
     </section>
 
-    <section class="sales-entry">
-      <h2>Record a Sale</h2>
-      <form id="sale-form">
-        <label for="sale-price">Select Price:</label>
-        <select id="sale-price" name="salePrice" required>
-          <option value="69">₱69</option>
-          <option value="99">₱99</option>
-        </select>
+    <!-- Wrap the sales form and receipt in a flex container so they sit side by side on larger screens -->
+    <div class="sales-area">
+      <section class="sales-entry">
+        <h2>Record a Sale</h2>
+        <form id="sale-form">
+          <label for="sale-price">Select Price:</label>
+          <select id="sale-price" name="salePrice" required>
+            <option value="69">₱69</option>
+            <option value="99">₱99</option>
+          </select>
 
-        <label for="sale-quantity">Quantity:</label>
-        <input type="number" id="sale-quantity" name="saleQuantity" min="1" value="1" required>
+          <label for="sale-quantity">Quantity:</label>
+          <input type="number" id="sale-quantity" name="saleQuantity" min="1" value="1" required>
 
-        <!-- New field to accept money received from the customer -->
-        <label for="money-received">Money Received:</label>
-        <input type="number" id="money-received" name="moneyReceived" min="0" step="0.01" placeholder="Enter amount" required>
+          <!-- Field to accept money received from the customer -->
+          <label for="money-received">Money Received:</label>
+          <input type="number" id="money-received" name="moneyReceived" min="0" step="0.01" placeholder="Enter amount" required>
 
-        <button type="submit">Submit Sale</button>
-      </form>
-      <p id="sale-message" class="message"></p>
-    </section>
+          <button type="submit">Submit Sale</button>
+        </form>
+        <p id="sale-message" class="message"></p>
+      </section>
+      <!-- Receipt section to display details of the last transaction -->
+      <section class="receipt" id="receipt">
+        <h2>Receipt</h2>
+        <p id="receipt-items" class="receipt-line">No sale yet.</p>
+        <p id="receipt-total" class="receipt-line"></p>
+        <p id="receipt-received" class="receipt-line"></p>
+        <p id="receipt-change" class="receipt-line"></p>
+      </section>
+    </div>
 
     <section class="admin-link">
       <p>Admin? <a href="admin.html">Go to Admin Dashboard</a></p>

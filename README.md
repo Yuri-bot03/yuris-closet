@@ -6,10 +6,11 @@ This repository contains a simple inventory‑management and point‑of‑sale (
 
 ### Worker Interface (`index.html`)
 
-- **View Current Inventory:**  See how many items remain at two fixed price points – ₱69 and ₱99.
-- **Record Sales:**  Workers can quickly record a sale by selecting the price and quantity sold **and entering the amount of money received**.  The app automatically deducts stock, logs the sale with a timestamp and calculates the customer’s change.
-- **Validation:**  The form prevents recording more items than are currently in stock and provides helpful messages when something is amiss.
-- **Local Persistence:**  Inventory counts and sales history are stored in the browser’s `localStorage`, so data persists between page reloads on the same machine.
+ - **View Current Inventory:**  See how many items remain at two fixed price points – ₱69 and ₱99.
+ - **Record Sales:**  Workers can quickly record a sale by selecting the price and quantity sold **and entering the amount of money received**.  The app automatically deducts stock, logs the sale with a timestamp and calculates the customer’s change.
+ - **Receipt Display:**  After each sale, a receipt panel on the right summarizes the transaction, showing the number of items sold, the total cost, the amount received from the customer and the change due.  This makes it easy for the cashier to verify the payment and provide a printed or verbal confirmation.
+ - **Validation:**  The form prevents recording more items than are currently in stock and provides helpful messages when something is amiss.
+ - **Local Persistence:**  Inventory counts and sales history are stored in the browser’s `localStorage`, so data persists between page reloads on the same machine.
 
 ### Admin Interface (`admin.html`)
 
@@ -17,7 +18,9 @@ This repository contains a simple inventory‑management and point‑of‑sale (
 - **Manage Stock:**  Easily add new items to the ₱69 or ₱99 inventory.
 - **Purchase History:**  View a table of all recorded sales, including date/time, price, quantity, and transaction total.
 - **Daily Gross Sales:**  The dashboard aggregates sales by date and displays the total revenue for each day.
-- **Export CSV:**  Download the complete sales log as a CSV file for accounting and analysis.
+-- **Export CSV:**  Download the complete sales log as a CSV file for accounting and analysis.
+
+-- **Switch Back to Worker Page:**  A convenient link at the top of the dashboard allows the administrator to jump back to the worker interface without typing the URL manually.
 
 ## How It Works
 

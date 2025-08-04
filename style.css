@@ -91,6 +91,50 @@ h2, h3 {
   color: var(--accent-gold);
 }
 
+/* Layout container for the sale form and receipt on the worker page */
+.sales-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Make the sale form take up more space than the receipt on larger screens */
+.sales-area .sales-entry {
+  flex: 1 1 60%;
+}
+
+/* Receipt card styling */
+.receipt {
+  flex: 1 1 35%;
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.receipt h2 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  color: var(--primary-green);
+}
+
+.receipt-line {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+}
+
+/* Worker link on admin dashboard */
+.worker-link {
+  margin-bottom: 1rem;
+}
+.worker-link a {
+  color: var(--primary-green);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
 /* Forms */
 form {
   display: flex;

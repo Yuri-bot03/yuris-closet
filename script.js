@@ -122,6 +122,23 @@ function initWorkerPage() {
       };
       addSaleRecord(record);
       saleMessage.textContent = `Sale recorded! Sold ${quantity} item(s) at ₱${price}. Change: ₱${change.toFixed(2)}.`;
+      // Update receipt details if the receipt section exists
+      const receiptItemsEl = document.getElementById('receipt-items');
+      const receiptTotalEl = document.getElementById('receipt-total');
+      const receiptReceivedEl = document.getElementById('receipt-received');
+      const receiptChangeEl = document.getElementById('receipt-change');
+      if (receiptItemsEl) {
+        receiptItemsEl.textContent = `${quantity} item(s) at ₱${price}`;
+      }
+      if (receiptTotalEl) {
+        receiptTotalEl.textContent = `Total: ₱${totalPrice.toFixed(2)}`;
+      }
+      if (receiptReceivedEl) {
+        receiptReceivedEl.textContent = `Money Received: ₱${moneyReceived.toFixed(2)}`;
+      }
+      if (receiptChangeEl) {
+        receiptChangeEl.textContent = `Change: ₱${change.toFixed(2)}`;
+      }
       // Reset fields
       document.getElementById('sale-quantity').value = 1;
       if (moneyReceivedInput) moneyReceivedInput.value = '';
