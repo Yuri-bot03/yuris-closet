@@ -57,7 +57,13 @@
       border-radius: 0.5rem;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       padding: 1rem;
-      height: 100%;
+      /* Fix chart card height to prevent the page from growing infinitely when charts render */
+      height: 320px;
+      overflow-y: hidden;
+    }
+    /* Ensure the Chart.js canvas stays within a reasonable height */
+    .chart-card canvas {
+      height: 250px !important;
     }
     .table-responsive {
       max-height: 300px;
@@ -77,16 +83,37 @@
           <a href="#" class="nav-link active"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
         </li>
         <li>
-          <a href="#" class="nav-link"><i class="fas fa-box"></i>Inventory</a>
+          <a href="#" class="nav-link"><i class="fas fa-users"></i>Staff</a>
         </li>
         <li>
-          <a href="#" class="nav-link"><i class="fas fa-receipt"></i>History</a>
+          <a href="#" class="nav-link"><i class="fas fa-file-invoice-dollar"></i>Payment Voucher</a>
         </li>
         <li>
-          <a href="#" class="nav-link"><i class="fas fa-plus-circle"></i>Add Stock</a>
+          <a href="#" class="nav-link"><i class="fas fa-money-check-alt"></i>Payroll</a>
         </li>
         <li>
-          <a href="#" class="nav-link"><i class="fas fa-shopping-cart"></i>Record Sale</a>
+          <a href="#" class="nav-link"><i class="fas fa-bullhorn"></i>Circulars</a>
+        </li>
+        <li>
+          <a href="#" class="nav-link"><i class="fas fa-tools"></i>Maintenance</a>
+        </li>
+        <li>
+          <a href="#" class="nav-link"><i class="fas fa-truck"></i>Logistics</a>
+        </li>
+        <li>
+          <a href="#" class="nav-link"><i class="fas fa-wallet"></i>Office Budget</a>
+        </li>
+        <li>
+          <a href="#" class="nav-link"><i class="fas fa-boxes"></i>Stocks &amp; Inventory</a>
+        </li>
+        <li>
+          <a href="#" class="nav-link"><i class="fas fa-bell"></i>Notifications</a>
+        </li>
+        <li>
+          <a href="#" class="nav-link"><i class="fas fa-chalkboard-teacher"></i>Capacity Building</a>
+        </li>
+        <li>
+          <a href="#" class="nav-link"><i class="fas fa-shopping-bag"></i>Procurements</a>
         </li>
       </ul>
       <div class="mt-auto px-4">
