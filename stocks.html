@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yuri's Closet – Stocks</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8fafc;
+      color: #212529;
+    }
+    .sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: #ffffff;
+      border-right: 1px solid #dee2e6;
+    }
+    .sidebar .nav-link {
+      color: #495057;
+      font-weight: 500;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+    }
+    .sidebar .nav-link.active {
+      background-color: #eef2ff;
+      color: #4c51bf;
+    }
+    .sidebar .nav-link i {
+      margin-right: 0.75rem;
+    }
+    .content {
+      flex: 1;
+      padding: 1.5rem;
+    }
+    .card-metric {
+      border: none;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .card-metric h6 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #6c757d;
+    }
+    .card-metric h3 {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <nav class="sidebar d-flex flex-column py-3">
+      <div class="px-4 pb-3 border-bottom mb-3">
+        <h4 class="m-0">Yuri's Closet</h4>
+        <small class="text-muted">Admin Dashboard</small>
+      </div>
+      <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+          <a href="index.html" class="nav-link"><i class="fas fa-cubes"></i> Inventory</a>
+        </li>
+        <li>
+          <a href="stocks.html" class="nav-link active"><i class="fas fa-box-open"></i> Stocks</a>
+        </li>
+        <li>
+          <a href="sales.html" class="nav-link"><i class="fas fa-chart-line"></i> Sales</a>
+        </li>
+      </ul>
+      <div class="mt-auto px-4">
+        <small class="text-muted">© <span id="year"></span> Yuri's Closet</small>
+      </div>
+    </nav>
+    <!-- Main content -->
+    <div class="content">
+      <!-- Top bar -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="mb-0">Stocks</h4>
+          <small id="today-date" class="text-muted"></small>
+        </div>
+        <div class="d-flex gap-2">
+          <button id="export-csv" class="btn btn-outline-secondary btn-sm">Export</button>
+        </div>
+      </div>
+      <!-- Metric cards showing current inventory -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-4">
+          <div class="card card-metric p-3">
+            <h6>Total Inventory (69)</h6>
+            <h3 id="metric-inv69">0</h3>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+          <div class="card card-metric p-3">
+            <h6>Total Inventory (99)</h6>
+            <h3 id="metric-inv99">0</h3>
+          </div>
+        </div>
+      </div>
+      <!-- Add stock form -->
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h6>Add Stock</h6>
+            <form id="stock-form" class="row g-2">
+              <div class="col-6">
+                <label for="stock-price" class="form-label">Price</label>
+                <select id="stock-price" class="form-select form-select-sm" required>
+                  <option value="69">69</option>
+                  <option value="99">99</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label for="stock-qty" class="form-label">Qty</label>
+                <input type="number" id="stock-qty" class="form-control form-control-sm" min="1" required>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary btn-sm mt-2 w-100">Add Stock</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h6>Current Inventory</h6>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>₱69</td>
+                  <td id="inv69-table">0</td>
+                </tr>
+                <tr>
+                  <td>₱99</td>
+                  <td id="inv99-table">0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Chart.js (not used here but loaded for consistency) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Shared script -->
+  <script src="script.js"></script>
+</body>
+</html>
