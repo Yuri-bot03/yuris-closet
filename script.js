@@ -1,28 +1,6 @@
-/*
- * Yuri's Closet Inventory System (refactored for unified admin dashboard)
- * Handles inventory counts, sales records, and dashboard functionality
- */
+// Yuri's Closet Admin Dashboard script
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Set the year in the footer
-  const yearEl = document.getElementById('year');
-  if (yearEl) {
-    yearEl.textContent = new Date().getFullYear();
-  }
-  // Initialize inventory values if they don't exist
-  if (localStorage.getItem('inventory69') === null) {
-    setInventory(69, 0);
-  }
-  if (localStorage.getItem('inventory99') === null) {
-    setInventory(99, 0);
-  }
-  // Setup sale form and update inventory display
-  initWorkerPage();
-  // Setup admin dashboard (inventory summary, history, daily summary, stock form, export button)
-  loadAdminData();
-});
-
-/* Utility functions */
+// Utility functions to manage inventory and sales records in localStorage
 function getInventory(price) {
   const key = price === 69 ? 'inventory69' : 'inventory99';
   const stored = localStorage.getItem(key);
@@ -45,213 +23,304 @@ function addSaleRecord(record) {
   localStorage.setItem('salesRecords', JSON.stringify(records));
 }
 
+// Ensure default values exist for inventory and sales
+function initializeStorage() {
+  if (localStorage.getItem('inventory69') === null) setInventory(69, 0);
+  if (localStorage.getItem('inventory99') === null) setInventory(99, 0);
+  if (localStorage.getItem('salesRecords') === null) localStorage.setItem('salesRecords', JSON.stringify([]));
+}
+
+// Group sales by date and accumulate quantities and totals
 function groupSalesByDate(records) {
   const summary = {};
   records.forEach(record => {
-    let dateKey = record.dateKey;
-    if (!dateKey) {
-      const d = new Date(record.timestamp);
-      const denverDateString = d.toLocaleString('en-US', { timeZone: 'America/Denver' });
-      const denverDate = new Date(denverDateString);
-      const year = denverDate.getFullYear();
-      const month = String(denverDate.getMonth() + 1).padStart(2, '0');
-      const day = String(denverDate.getDate()).padStart(2, '0');
-      dateKey = `${year}-${month}-${day}`;
+    const date = record.dateKey;
+    if (!summary[date]) {
+      summary[date] = { qty69: 0, qty99: 0, total: 0 };
     }
-    const total = record.price * record.quantity;
-    if (!summary[dateKey]) {
-      summary[dateKey] = 0;
-    }
-    summary[dateKey] += total;
+    if (record.price === 69) summary[date].qty69 += record.quantity;
+    if (record.price === 99) summary[date].qty99 += record.quantity;
+    summary[date].total += record.price * record.quantity;
   });
   return summary;
 }
 
-/* Worker/Admin unified functions */
-function initWorkerPage() {
-  updateWorkerInventoryDisplay();
-  const saleForm = document.getElementById('sale-form');
-  const saleMessage = document.getElementById('sale-message');
-  if (saleForm) {
-    saleForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const price = parseInt(document.getElementById('sale-price').value, 10);
-      const quantity = parseInt(document.getElementById('sale-quantity').value, 10);
-      const moneyReceivedInput = document.getElementById('money-received');
-      const moneyReceived = moneyReceivedInput ? parseFloat(moneyReceivedInput.value) : NaN;
-      const current = getInventory(price);
-      if (quantity <= 0) {
-        saleMessage.textContent = 'Please enter a valid quantity.';
-        return;
-      }
-      if (current < quantity) {
-        saleMessage.textContent = `Not enough inventory for ₱${price}. Currently available: ${current}.`;
-        return;
-      }
-      const totalPrice = price * quantity;
-      if (isNaN(moneyReceived) || moneyReceived < totalPrice) {
-        saleMessage.textContent = `Insufficient amount received. Total is ₱${totalPrice}.`;
-        return;
-      }
-      const change = moneyReceived - totalPrice;
-      const newInventory = current - quantity;
-      setInventory(price, newInventory);
-      // Determine date key in America/Denver timezone
-      const now = new Date();
-      const denverDateString = now.toLocaleString('en-US', { timeZone: 'America/Denver' });
-      const denverDate = new Date(denverDateString);
-      const year = denverDate.getFullYear();
-      const month = String(denverDate.getMonth() + 1).padStart(2, '0');
-      const day = String(denverDate.getDate()).padStart(2, '0');
-      const dateKey = `${year}-${month}-${day}`;
-      const record = {
-        timestamp: now.toISOString(),
-        price: price,
-        quantity: quantity,
-        dateKey: dateKey
-      };
-      addSaleRecord(record);
-      saleMessage.textContent = `Sale recorded! Sold ${quantity} item(s) at ₱${price}. Change: ₱${change.toFixed(2)}.`;
-      // Update receipt details
-      const receiptItemsEl = document.getElementById('receipt-items');
-      const receiptTotalEl = document.getElementById('receipt-total');
-      const receiptReceivedEl = document.getElementById('receipt-received');
-      const receiptChangeEl = document.getElementById('receipt-change');
-      if (receiptItemsEl) {
-        receiptItemsEl.textContent = `${quantity} item(s) at ₱${price}`;
-      }
-      if (receiptTotalEl) {
-        receiptTotalEl.textContent = `Total: ₱${totalPrice.toFixed(2)}`;
-      }
-      if (receiptReceivedEl) {
-        receiptReceivedEl.textContent = `Money Received: ₱${moneyReceived.toFixed(2)}`;
-      }
-      if (receiptChangeEl) {
-        receiptChangeEl.textContent = `Change: ₱${change.toFixed(2)}`;
-      }
-      // Reset fields
-      document.getElementById('sale-quantity').value = 1;
-      if (moneyReceivedInput) moneyReceivedInput.value = '';
-      updateWorkerInventoryDisplay();
-      // Update admin displays and tables after sale
-      loadAdminData();
-    });
-  }
+// Format currency helper
+function formatCurrency(value) {
+  return `₱${value.toFixed(2)}`;
 }
 
-function updateWorkerInventoryDisplay() {
-  const inv69El = document.getElementById('inventory-69');
-  const inv99El = document.getElementById('inventory-99');
-  if (inv69El) inv69El.textContent = getInventory(69);
-  if (inv99El) inv99El.textContent = getInventory(99);
-}
-
-function loadAdminData() {
-  updateAdminInventoryDisplay();
+// Refresh dashboard metrics, tables and charts
+function refreshDashboard() {
+  updateMetrics();
   populateHistoryTable();
   populateDailyTable();
-  setupStockForm();
-  setupExportButton();
+  renderSalesChart();
+  renderInventoryChart();
 }
 
-function updateAdminInventoryDisplay() {
-  // Support both old admin IDs and unified IDs
-  const inv69El = document.getElementById('admin-inventory-69') || document.getElementById('inventory-69');
-  const inv99El = document.getElementById('admin-inventory-99') || document.getElementById('inventory-99');
-  if (inv69El) inv69El.textContent = getInventory(69);
-  if (inv99El) inv99El.textContent = getInventory(99);
+// Update the metric cards
+function updateMetrics() {
+  const inv69 = getInventory(69);
+  const inv99 = getInventory(99);
+  const records = getSalesRecords();
+  let totalIncome = 0;
+  records.forEach(r => totalIncome += r.price * r.quantity);
+  document.getElementById('metric-inv69').textContent = inv69;
+  document.getElementById('metric-inv99').textContent = inv99;
+  document.getElementById('metric-sales-count').textContent = records.length;
+  document.getElementById('metric-total-income').textContent = formatCurrency(totalIncome);
+  // We could calculate percentage change if previous period values were stored; leave blank for now
 }
 
+// Populate purchase history table
 function populateHistoryTable() {
   const tbody = document.querySelector('#history-table tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
   const records = getSalesRecords();
+  // Sort descending by timestamp
   records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   records.forEach(record => {
     const tr = document.createElement('tr');
     const dateTd = document.createElement('td');
     const priceTd = document.createElement('td');
     const qtyTd = document.createElement('td');
-    const totalTd = document.createElement('td');
-    const date = new Date(record.timestamp);
-    dateTd.textContent = date.toLocaleString();
+    const paidTd = document.createElement('td');
+    const changeTd = document.createElement('td');
+    const dateObj = new Date(record.timestamp);
+    dateTd.textContent = dateObj.toLocaleString('en-US', { timeZone: 'America/Denver' });
     priceTd.textContent = `₱${record.price}`;
     qtyTd.textContent = record.quantity;
-    totalTd.textContent = `₱${record.price * record.quantity}`;
+    // Use paid and change if available, otherwise use '-' to indicate unknown
+    if (typeof record.paid === 'number') {
+      const total = record.price * record.quantity;
+      const change = record.paid - total;
+      paidTd.textContent = formatCurrency(record.paid);
+      changeTd.textContent = formatCurrency(change);
+    } else {
+      paidTd.textContent = '-';
+      changeTd.textContent = '-';
+    }
     tr.appendChild(dateTd);
     tr.appendChild(priceTd);
     tr.appendChild(qtyTd);
-    tr.appendChild(totalTd);
+    tr.appendChild(paidTd);
+    tr.appendChild(changeTd);
     tbody.appendChild(tr);
   });
 }
 
+// Populate daily summary table showing quantities sold per price
 function populateDailyTable() {
   const tbody = document.querySelector('#daily-table tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
   const records = getSalesRecords();
-  const summary = groupSalesByDate(records);
-  const dates = Object.keys(summary).sort((a, b) => new Date(b) - new Date(a));
+  const grouped = groupSalesByDate(records);
+  const dates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
   dates.forEach(date => {
+    const summary = grouped[date];
     const tr = document.createElement('tr');
     const dateTd = document.createElement('td');
-    const totalTd = document.createElement('td');
     dateTd.textContent = new Date(date + 'T00:00:00').toLocaleDateString('en-US', { timeZone: 'America/Denver' });
-    totalTd.textContent = `₱${summary[date]}`;
+    const qty69Td = document.createElement('td');
+    qty69Td.textContent = summary.qty69;
+    const qty99Td = document.createElement('td');
+    qty99Td.textContent = summary.qty99;
     tr.appendChild(dateTd);
-    tr.appendChild(totalTd);
+    tr.appendChild(qty69Td);
+    tr.appendChild(qty99Td);
     tbody.appendChild(tr);
   });
 }
 
-function setupStockForm() {
-  const stockForm = document.getElementById('stock-form');
-  const stockMessage = document.getElementById('stock-message');
-  if (stockForm) {
-    stockForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const price = parseInt(document.getElementById('stock-price').value, 10);
-      const quantity = parseInt(document.getElementById('stock-quantity').value, 10);
-      if (quantity <= 0) {
-        stockMessage.textContent = 'Please enter a valid quantity.';
-        return;
-      }
-      const current = getInventory(price);
-      const newInventory = current + quantity;
-      setInventory(price, newInventory);
-      stockMessage.textContent = `Added ${quantity} item(s) to ₱${price} inventory.`;
-      document.getElementById('stock-quantity').value = 1;
-      updateAdminInventoryDisplay();
-      updateWorkerInventoryDisplay();
-    });
+// Render bar chart for daily gross sales
+let salesChartInstance;
+function renderSalesChart() {
+  const canvas = document.getElementById('salesChart');
+  if (!canvas) return;
+  const records = getSalesRecords();
+  const grouped = groupSalesByDate(records);
+  const dates = Object.keys(grouped).sort();
+  const labels = dates.map(d => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { timeZone: 'America/Denver', month: 'short', day: 'numeric' }));
+  const totals = dates.map(d => grouped[d].total);
+  // Destroy previous chart if exists
+  if (salesChartInstance) {
+    salesChartInstance.destroy();
   }
-}
-
-function setupExportButton() {
-  const exportBtn = document.getElementById('export-csv');
-  if (!exportBtn) return;
-  exportBtn.addEventListener('click', () => {
-    const records = getSalesRecords();
-    if (!records || records.length === 0) {
-      alert('There are no sales records to export.');
-      return;
+  salesChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Gross Sales (₱)',
+        data: totals,
+        backgroundColor: 'rgba(76, 81, 191, 0.6)',
+        borderColor: 'rgba(76, 81, 191, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true }
+      }
     }
-    let csv = 'Date/Time,Price,Quantity,Total\n';
-    records.forEach(record => {
-      const date = new Date(record.timestamp).toLocaleString();
-      const total = record.price * record.quantity;
-      csv += `${date},${record.price},${record.quantity},${total}\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'sales_records.csv';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
   });
 }
+
+// Render bar chart for quantity sold per price each day
+let inventoryChartInstance;
+function renderInventoryChart() {
+  const canvas = document.getElementById('inventoryChart');
+  if (!canvas) return;
+  const records = getSalesRecords();
+  const grouped = groupSalesByDate(records);
+  const dates = Object.keys(grouped).sort();
+  const labels = dates.map(d => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { timeZone: 'America/Denver', month: 'short', day: 'numeric' }));
+  const qty69 = dates.map(d => grouped[d].qty69);
+  const qty99 = dates.map(d => grouped[d].qty99);
+  if (inventoryChartInstance) {
+    inventoryChartInstance.destroy();
+  }
+  inventoryChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: '69 Sold',
+          data: qty69,
+          backgroundColor: 'rgba(28, 168, 221, 0.6)',
+          borderColor: 'rgba(28, 168, 221, 1)',
+          borderWidth: 1
+        },
+        {
+          label: '99 Sold',
+          data: qty99,
+          backgroundColor: 'rgba(232, 93, 117, 0.6)',
+          borderColor: 'rgba(232, 93, 117, 1)',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+// Handle Add Stock form submission
+function handleAddStock(e) {
+  e.preventDefault();
+  const price = parseInt(document.getElementById('stock-price').value, 10);
+  const quantity = parseInt(document.getElementById('stock-qty').value, 10);
+  if (quantity <= 0) return;
+  const current = getInventory(price);
+  setInventory(price, current + quantity);
+  // Reset form
+  document.getElementById('stock-qty').value = 1;
+  refreshDashboard();
+}
+
+// Handle Record Sale form submission
+function handleRecordSale(e) {
+  e.preventDefault();
+  const price = parseInt(document.getElementById('sale-price').value, 10);
+  const quantity = parseInt(document.getElementById('sale-qty').value, 10);
+  const paid = parseFloat(document.getElementById('sale-paid').value);
+  if (quantity <= 0) return;
+  const current = getInventory(price);
+  if (current < quantity) {
+    alert(`Not enough inventory for ₱${price}. Currently available: ${current}`);
+    return;
+  }
+  const total = price * quantity;
+  if (isNaN(paid) || paid < total) {
+    alert(`Insufficient amount received. Total is ₱${total}`);
+    return;
+  }
+  // Update inventory
+  setInventory(price, current - quantity);
+  // Determine date key in America/Denver timezone
+  const now = new Date();
+  const denverString = now.toLocaleString('en-US', { timeZone: 'America/Denver' });
+  const denverDate = new Date(denverString);
+  const year = denverDate.getFullYear();
+  const month = String(denverDate.getMonth() + 1).padStart(2, '0');
+  const day = String(denverDate.getDate()).padStart(2, '0');
+  const dateKey = `${year}-${month}-${day}`;
+  // Store record including paid amount
+  addSaleRecord({ timestamp: now.toISOString(), price: price, quantity: quantity, paid: paid, dateKey: dateKey });
+  // Reset form
+  document.getElementById('sale-qty').value = 1;
+  document.getElementById('sale-paid').value = '';
+  refreshDashboard();
+}
+
+// Export sales records to CSV
+function exportCSV() {
+  const records = getSalesRecords();
+  if (!records || records.length === 0) {
+    alert('There are no sales records to export.');
+    return;
+  }
+  let csv = 'Date/Time,Price,Quantity,Paid,Total,Change\n';
+  records.forEach(record => {
+    const date = new Date(record.timestamp).toLocaleString('en-US', { timeZone: 'America/Denver' });
+    const total = record.price * record.quantity;
+    const paid = typeof record.paid === 'number' ? record.paid : '';
+    const change = typeof record.paid === 'number' ? (record.paid - total) : '';
+    csv += `${date},${record.price},${record.quantity},${paid},${total},${change}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'sales_records.csv';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+// Setup event listeners and initial display
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize storage
+  initializeStorage();
+  // Set year and current date
+  const yearEl = document.getElementById('year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+  const todayEl = document.getElementById('today-date');
+  if (todayEl) {
+    const now = new Date();
+    const denverStr = now.toLocaleString('en-US', { timeZone: 'America/Denver', weekday:'long', month:'long', day:'numeric', year:'numeric' });
+    todayEl.textContent = denverStr;
+  }
+  // Set default date range inputs to last 7 days (optional)
+  const startInput = document.getElementById('date-start');
+  const endInput = document.getElementById('date-end');
+  if (startInput && endInput) {
+    const now = new Date();
+    const endDate = now.toISOString().split('T')[0];
+    const past = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
+    const startDate = past.toISOString().split('T')[0];
+    startInput.value = startDate;
+    endInput.value = endDate;
+  }
+  // Attach form handlers
+  const stockForm = document.getElementById('stock-form');
+  if (stockForm) stockForm.addEventListener('submit', handleAddStock);
+  const saleForm = document.getElementById('sale-form');
+  if (saleForm) saleForm.addEventListener('submit', handleRecordSale);
+  const exportBtn = document.getElementById('export-csv');
+  if (exportBtn) exportBtn.addEventListener('click', exportCSV);
+  // Initial render
+  refreshDashboard();
+});
