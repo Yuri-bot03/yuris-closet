@@ -71,6 +71,12 @@ function updateMetrics() {
   document.getElementById('metric-sales-count').textContent = records.length;
   document.getElementById('metric-total-income').textContent = formatCurrency(totalIncome);
   // We could calculate percentage change if previous period values were stored; leave blank for now
+
+  // Also update any inventory summary table cells on pages like stocks.html
+  const inv69Cell = document.getElementById('inv69-table');
+  if (inv69Cell) inv69Cell.textContent = inv69;
+  const inv99Cell = document.getElementById('inv99-table');
+  if (inv99Cell) inv99Cell.textContent = inv99;
 }
 
 // Populate purchase history table
