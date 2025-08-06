@@ -1,6 +1,6 @@
 /*
- * Yuri's Closet Inventory System
- * Handles inventory counts, sales records, and admin dashboard functionality
+ * Yuri's Closet Inventory System (refactored for unified admin dashboard)
+ * Handles inventory counts, sales records, and dashboard functionality
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,14 +9,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (yearEl) {
     yearEl.textContent = new Date().getFullYear();
   }
-
-  // Determine if we're on the worker or admin page
-  if (document.getElementById('worker')) {
-    initWorkerPage();
+  // Initialize inventory values if they don't exist
+  if (localStorage.getItem('inventory69') === null) {
+    setInventory(69, 0);
   }
-  if (document.getElementById('admin')) {
-    initAdminPage();
+  if (localStorage.getItem('inventory99') === null) {
+    setInventory(99, 0);
   }
+  // Setup sale form and update inventory display
+  initWorkerPage();
+  // Setup admin dashboard (inventory summary, history, daily summary, stock form, export button)
+  loadAdminData();
 });
 
 /* Utility functions */
@@ -43,13 +46,10 @@ function addSaleRecord(record) {
 }
 
 function groupSalesByDate(records) {
-  // Aggregate records by local date (YYYY-MM-DD in the user's timezone)
   const summary = {};
   records.forEach(record => {
-    // Prefer the stored local dateKey if available
     let dateKey = record.dateKey;
     if (!dateKey) {
-      // Fallback: derive a date string in the store's timezone (America/Denver)
       const d = new Date(record.timestamp);
       const denverDateString = d.toLocaleString('en-US', { timeZone: 'America/Denver' });
       const denverDate = new Date(denverDateString);
@@ -67,17 +67,9 @@ function groupSalesByDate(records) {
   return summary;
 }
 
-/* Worker Page */
+/* Worker/Admin unified functions */
 function initWorkerPage() {
-  // Initialize inventory values if they don't exist
-  if (localStorage.getItem('inventory69') === null) {
-    setInventory(69, 0);
-  }
-  if (localStorage.getItem('inventory99') === null) {
-    setInventory(99, 0);
-  }
   updateWorkerInventoryDisplay();
-
   const saleForm = document.getElementById('sale-form');
   const saleMessage = document.getElementById('sale-message');
   if (saleForm) {
@@ -96,7 +88,6 @@ function initWorkerPage() {
         saleMessage.textContent = `Not enough inventory for ₱${price}. Currently available: ${current}.`;
         return;
       }
-      // Calculate total price and ensure money received is sufficient
       const totalPrice = price * quantity;
       if (isNaN(moneyReceived) || moneyReceived < totalPrice) {
         saleMessage.textContent = `Insufficient amount received. Total is ₱${totalPrice}.`;
@@ -105,8 +96,7 @@ function initWorkerPage() {
       const change = moneyReceived - totalPrice;
       const newInventory = current - quantity;
       setInventory(price, newInventory);
-      // Determine the date in the store's timezone (America/Denver).  This avoids
-      // shifting the date when the browser runs in a different timezone.
+      // Determine date key in America/Denver timezone
       const now = new Date();
       const denverDateString = now.toLocaleString('en-US', { timeZone: 'America/Denver' });
       const denverDate = new Date(denverDateString);
@@ -115,14 +105,14 @@ function initWorkerPage() {
       const day = String(denverDate.getDate()).padStart(2, '0');
       const dateKey = `${year}-${month}-${day}`;
       const record = {
-        timestamp: now.toISOString(), // still store the ISO timestamp
+        timestamp: now.toISOString(),
         price: price,
         quantity: quantity,
         dateKey: dateKey
       };
       addSaleRecord(record);
       saleMessage.textContent = `Sale recorded! Sold ${quantity} item(s) at ₱${price}. Change: ₱${change.toFixed(2)}.`;
-      // Update receipt details if the receipt section exists
+      // Update receipt details
       const receiptItemsEl = document.getElementById('receipt-items');
       const receiptTotalEl = document.getElementById('receipt-total');
       const receiptReceivedEl = document.getElementById('receipt-received');
@@ -143,6 +133,8 @@ function initWorkerPage() {
       document.getElementById('sale-quantity').value = 1;
       if (moneyReceivedInput) moneyReceivedInput.value = '';
       updateWorkerInventoryDisplay();
+      // Update admin displays and tables after sale
+      loadAdminData();
     });
   }
 }
@@ -154,34 +146,6 @@ function updateWorkerInventoryDisplay() {
   if (inv99El) inv99El.textContent = getInventory(99);
 }
 
-/* Admin Page */
-function initAdminPage() {
-  const passwordSection = document.getElementById('password-section');
-  const dashboard = document.getElementById('dashboard');
-  const passwordForm = document.getElementById('password-form');
-  const passwordMessage = document.getElementById('password-message');
-  const adminPasswordField = document.getElementById('admin-password');
-
-  // Hard-coded admin password; in a real application this should be secured.
-  const ADMIN_PASSWORD = 'yuriadmin';
-
-  if (passwordForm) {
-    passwordForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const entered = adminPasswordField.value;
-      if (entered === ADMIN_PASSWORD) {
-        passwordMessage.textContent = '';
-        passwordSection.classList.add('hidden');
-        dashboard.classList.remove('hidden');
-        loadAdminData();
-      } else {
-        passwordMessage.textContent = 'Incorrect password.';
-      }
-      adminPasswordField.value = '';
-    });
-  }
-}
-
 function loadAdminData() {
   updateAdminInventoryDisplay();
   populateHistoryTable();
@@ -191,8 +155,9 @@ function loadAdminData() {
 }
 
 function updateAdminInventoryDisplay() {
-  const inv69El = document.getElementById('admin-inventory-69');
-  const inv99El = document.getElementById('admin-inventory-99');
+  // Support both old admin IDs and unified IDs
+  const inv69El = document.getElementById('admin-inventory-69') || document.getElementById('inventory-69');
+  const inv99El = document.getElementById('admin-inventory-99') || document.getElementById('inventory-99');
   if (inv69El) inv69El.textContent = getInventory(69);
   if (inv99El) inv99El.textContent = getInventory(99);
 }
@@ -228,13 +193,11 @@ function populateDailyTable() {
   tbody.innerHTML = '';
   const records = getSalesRecords();
   const summary = groupSalesByDate(records);
-  // Sort dates descending
   const dates = Object.keys(summary).sort((a, b) => new Date(b) - new Date(a));
   dates.forEach(date => {
     const tr = document.createElement('tr');
     const dateTd = document.createElement('td');
     const totalTd = document.createElement('td');
-    // Display the date in the store's timezone
     dateTd.textContent = new Date(date + 'T00:00:00').toLocaleDateString('en-US', { timeZone: 'America/Denver' });
     totalTd.textContent = `₱${summary[date]}`;
     tr.appendChild(dateTd);
@@ -261,15 +224,11 @@ function setupStockForm() {
       stockMessage.textContent = `Added ${quantity} item(s) to ₱${price} inventory.`;
       document.getElementById('stock-quantity').value = 1;
       updateAdminInventoryDisplay();
+      updateWorkerInventoryDisplay();
     });
   }
 }
 
-/**
- * Attach a click handler to the Export CSV button. When clicked the current
- * sales records will be downloaded as a CSV file. If there are no records
- * an alert will be shown instead.
- */
 function setupExportButton() {
   const exportBtn = document.getElementById('export-csv');
   if (!exportBtn) return;
@@ -279,7 +238,6 @@ function setupExportButton() {
       alert('There are no sales records to export.');
       return;
     }
-    // Build CSV header
     let csv = 'Date/Time,Price,Quantity,Total\n';
     records.forEach(record => {
       const date = new Date(record.timestamp).toLocaleString();

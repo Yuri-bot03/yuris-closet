@@ -2,70 +2,133 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <title>Yuri's Closet – Inventory Admin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yuri's Closet – Inventory</title>
-  <link rel="stylesheet" href="style.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #d4e3fc, #f5d5e0);
+      min-height: 100vh;
+    }
+    .card { margin-bottom: 1rem; }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>Yuri's Closet</h1>
-    <p class="tagline">Inventory Management – Worker</p>
-  </header>
-
-  <main id="worker">
-    <section class="inventory-status">
-      <h2>Current Inventory</h2>
-      <div class="status-item">
-        <span class="price-label">₱69 Items:</span>
-        <span id="inventory-69" class="inventory-count">0</span>
-      </div>
-      <div class="status-item">
-        <span class="price-label">₱99 Items:</span>
-        <span id="inventory-99" class="inventory-count">0</span>
-      </div>
-    </section>
-
-    <!-- Wrap the sales form and receipt in a flex container so they sit side by side on larger screens -->
-    <div class="sales-area">
-      <section class="sales-entry">
-        <h2>Record a Sale</h2>
-        <form id="sale-form">
-          <label for="sale-price">Select Price:</label>
-          <select id="sale-price" name="salePrice" required>
-            <option value="69">₱69</option>
-            <option value="99">₱99</option>
-          </select>
-
-          <label for="sale-quantity">Quantity:</label>
-          <input type="number" id="sale-quantity" name="saleQuantity" min="1" value="1" required>
-
-          <!-- Field to accept money received from the customer -->
-          <label for="money-received">Money Received:</label>
-          <input type="number" id="money-received" name="moneyReceived" min="0" step="0.01" placeholder="Enter amount" required>
-
-          <button type="submit">Submit Sale</button>
-        </form>
-        <p id="sale-message" class="message"></p>
-      </section>
-      <!-- Receipt section to display details of the last transaction -->
-      <section class="receipt" id="receipt">
-        <h2>Receipt</h2>
-        <p id="receipt-items" class="receipt-line">No sale yet.</p>
-        <p id="receipt-total" class="receipt-line"></p>
-        <p id="receipt-received" class="receipt-line"></p>
-        <p id="receipt-change" class="receipt-line"></p>
-      </section>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Yuri's Closet Admin</a>
     </div>
-
-    <section class="admin-link">
-      <p>Admin? <a href="admin.html">Go to Admin Dashboard</a></p>
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; <span id="year"></span> Yuri's Closet. All rights reserved.</p>
+  </nav>
+  <div class="container py-4">
+    <div class="row">
+      <div class="col-md-6">
+        <!-- Inventory summary -->
+        <div class="card">
+          <div class="card-header">Current Inventory</div>
+          <div class="card-body">
+            <p>₱69 Items: <span id="inventory-69" class="fw-bold">0</span></p>
+            <p>₱99 Items: <span id="inventory-99" class="fw-bold">0</span></p>
+          </div>
+        </div>
+        <!-- Add stock -->
+        <div class="card">
+          <div class="card-header">Add Stock</div>
+          <div class="card-body">
+            <form id="stock-form">
+              <div class="mb-3">
+                <label for="stock-price" class="form-label">Select Price</label>
+                <select id="stock-price" class="form-select">
+                  <option value="69">₱69</option>
+                  <option value="99">₱99</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="stock-quantity" class="form-label">Quantity to Add</label>
+                <input type="number" id="stock-quantity" class="form-control" value="1" min="1">
+              </div>
+              <div id="stock-message" class="text-danger mb-2"></div>
+              <button type="submit" class="btn btn-primary">Add Stock</button>
+            </form>
+          </div>
+        </div>
+        <!-- Record sale -->
+        <div class="card">
+          <div class="card-header">Record a Sale</div>
+          <div class="card-body">
+            <form id="sale-form">
+              <div class="mb-3">
+                <label for="sale-price" class="form-label">Select Price</label>
+                <select id="sale-price" class="form-select">
+                  <option value="69">₱69</option>
+                  <option value="99">₱99</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="sale-quantity" class="form-label">Quantity</label>
+                <input type="number" id="sale-quantity" class="form-control" value="1" min="1">
+              </div>
+              <div class="mb-3">
+                <label for="money-received" class="form-label">Money Received</label>
+                <input type="number" step="0.01" id="money-received" class="form-control">
+              </div>
+              <div id="sale-message" class="text-danger mb-2"></div>
+              <button type="submit" class="btn btn-success">Submit Sale</button>
+            </form>
+            <hr>
+            <h5>Receipt</h5>
+            <p id="receipt-items">No sale yet.</p>
+            <p id="receipt-total"></p>
+            <p id="receipt-received"></p>
+            <p id="receipt-change"></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <!-- Purchase history -->
+        <div class="card">
+          <div class="card-header">Purchase History</div>
+          <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+            <table id="history-table" class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Date/Time</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Daily sales -->
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Daily Gross Sales</span>
+            <button id="export-csv" class="btn btn-outline-secondary btn-sm">Export CSV</button>
+          </div>
+          <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+            <table id="daily-table" class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Total Gross Sales (₱)</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="text-center py-3">
+    &copy; <span id="year"></span> Yuri's Closet. All rights reserved.
   </footer>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -2,96 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yuri's Closet – Admin Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Yuri's Closet Admin</title>
+  <meta http-equiv="refresh" content="0; url=index.html">
 </head>
 <body>
-  <header>
-    <h1>Yuri's Closet</h1>
-    <p class="tagline">Admin Dashboard</p>
-  </header>
-
-  <main id="admin">
-    <section class="password-section" id="password-section">
-      <h2>Admin Login</h2>
-      <p>Please enter your admin password to access the dashboard.</p>
-      <form id="password-form">
-        <input type="password" id="admin-password" placeholder="Enter password" required>
-        <button type="submit">Login</button>
-      </form>
-      <p id="password-message" class="message"></p>
-    </section>
-
-    <section class="dashboard hidden" id="dashboard">
-      <!-- Link to quickly return to the worker page -->
-      <p class="worker-link"><a href="index.html">Switch to Worker Page</a></p>
-      <div class="inventory-management">
-        <h2>Inventory Management</h2>
-        <div class="status-item">
-          <span class="price-label">₱69 Items:</span>
-          <span id="admin-inventory-69" class="inventory-count">0</span>
-        </div>
-        <div class="status-item">
-          <span class="price-label">₱99 Items:</span>
-          <span id="admin-inventory-99" class="inventory-count">0</span>
-        </div>
-        <form id="stock-form">
-          <h3>Add Stock</h3>
-          <label for="stock-price">Select Price:</label>
-          <select id="stock-price" name="stockPrice" required>
-            <option value="69">₱69</option>
-            <option value="99">₱99</option>
-          </select>
-          <label for="stock-quantity">Quantity to Add:</label>
-          <input type="number" id="stock-quantity" name="stockQuantity" min="1" value="1" required>
-          <button type="submit">Add Stock</button>
-        </form>
-        <p id="stock-message" class="message"></p>
-      </div>
-
-      <div class="sales-summary">
-        <h2>Sales Summary</h2>
-        <h3>Purchase History</h3>
-        <table id="history-table">
-          <thead>
-            <tr>
-              <th>Date/Time</th>
-              <th>Price</th>
-              <th>Quantity</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Sales rows will be populated here -->
-          </tbody>
-        </table>
-
-        <h3>Daily Gross Sales</h3>
-        <table id="daily-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Total Gross Sales (₱)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Daily summary rows will be populated here -->
-          </tbody>
-        </table>
-
-        <!-- Export button to download sales data as CSV -->
-        <button id="export-csv" class="export-button">Export CSV</button>
-      </div>
-
-      <!-- Additional features section removed as per design update -->
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; <span id="year"></span> Yuri's Closet. All rights reserved.</p>
-  </footer>
-
-  <script src="script.js"></script>
+  <p>If you are not redirected automatically, <a href="index.html">click here</a>.</p>
 </body>
 </html>
