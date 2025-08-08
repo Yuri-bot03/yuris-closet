@@ -23,6 +23,22 @@ function addSaleRecord(record) {
   localStorage.setItem('salesRecords', JSON.stringify(records));
 }
 
+// Delete a sale record by its timestamp and restore inventory
+function deleteSaleByTimestamp(timestamp) {
+  const records = getSalesRecords();
+  const index = records.findIndex(r => r.timestamp === timestamp);
+  if (index === -1) return;
+  const record = records[index];
+  // Restore inventory
+  const current = getInventory(record.price);
+  setInventory(record.price, current + record.quantity);
+  // Remove record
+  records.splice(index, 1);
+  localStorage.setItem('salesRecords', JSON.stringify(records));
+  // Refresh the dashboard to reflect changes
+  refreshDashboard();
+}
+
 // Ensure default values exist for inventory and sales
 function initializeStorage() {
   if (localStorage.getItem('inventory69') === null) setInventory(69, 0);
@@ -113,6 +129,17 @@ function populateHistoryTable() {
     tr.appendChild(qtyTd);
     tr.appendChild(paidTd);
     tr.appendChild(changeTd);
+    // Add delete action cell with button
+    const actionTd = document.createElement('td');
+    const delBtn = document.createElement('button');
+    delBtn.textContent = 'Delete';
+    delBtn.className = 'btn btn-sm btn-danger';
+    delBtn.addEventListener('click', () => {
+      // Use timestamp as unique identifier for deletion
+      deleteSaleByTimestamp(record.timestamp);
+    });
+    actionTd.appendChild(delBtn);
+    tr.appendChild(actionTd);
     tbody.appendChild(tr);
   });
 }
@@ -270,6 +297,29 @@ function handleRecordSale(e) {
   refreshDashboard();
 }
 
+// Handle Remove Stock form submission
+function handleRemoveStock(e) {
+  e.preventDefault();
+  // Extract values from the remove stock form
+  const price = parseInt(document.getElementById('remove-stock-price').value, 10);
+  const quantity = parseInt(document.getElementById('remove-stock-qty').value, 10);
+  // Ignore non-positive quantities
+  if (quantity <= 0) return;
+  const current = getInventory(price);
+  let newQty = current - quantity;
+  // If the new quantity would be negative, ask for confirmation and clamp to zero
+  if (newQty < 0) {
+    if (!confirm(`Removing ${quantity} from ₱${price} inventory would result in negative stock. Set inventory to zero?`)) {
+      return;
+    }
+    newQty = 0;
+  }
+  setInventory(price, newQty);
+  // Reset the form to a sensible default
+  document.getElementById('remove-stock-qty').value = 1;
+  refreshDashboard();
+}
+
 // Export sales records to CSV
 function exportCSV() {
   const records = getSalesRecords();
@@ -327,6 +377,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (saleForm) saleForm.addEventListener('submit', handleRecordSale);
   const exportBtn = document.getElementById('export-csv');
   if (exportBtn) exportBtn.addEventListener('click', exportCSV);
+  // Bind remove stock form if present
+  const removeStockForm = document.getElementById('remove-stock-form');
+  if (removeStockForm) removeStockForm.addEventListener('submit', handleRemoveStock);
   // Initial render
   refreshDashboard();
 });
