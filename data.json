@@ -6,31 +6,10 @@
       "quantity": 1,
       "paid": 69,
       "dateKey": "2025-08-08"
-    },
-    {
-      "timestamp": "2025-08-08T01:20:13.064Z",
-      "price": 69,
-      "quantity": 1,
-      "paid": 69,
-      "dateKey": "2025-08-08"
-    },
-    {
-      "timestamp": "2025-08-08T01:20:16.377Z",
-      "price": 69,
-      "quantity": 1,
-      "paid": 69,
-      "dateKey": "2025-08-08"
-    },
-    {
-      "timestamp": "2025-08-08T01:20:20.969Z",
-      "price": 99,
-      "quantity": 1,
-      "paid": 100,
-      "dateKey": "2025-08-08"
     }
   ],
   "inventory250": 1,
-  "inventory69": 47,
+  "inventory69": 49,
   "inventory149": 2,
-  "inventory99": 29
+  "inventory99": 30
 }
