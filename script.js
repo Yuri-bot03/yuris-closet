@@ -225,7 +225,8 @@ function populateHistoryTable() {
     const paidTd = document.createElement('td');
     const changeTd = document.createElement('td');
     const dateObj = new Date(record.timestamp);
-    dateTd.textContent = dateObj.toLocaleString('en-US', { timeZone: 'America/Denver' });
+    // Display timestamps in the Asia/Manila timezone to reflect Philippine time
+    dateTd.textContent = dateObj.toLocaleString('en-US', { timeZone: 'Asia/Manila' });
     priceTd.textContent = `₱${record.price}`;
     qtyTd.textContent = record.quantity;
     // Use paid and change if available, otherwise use '-' to indicate unknown
@@ -270,7 +271,8 @@ function populateDailyTable() {
     const summary = grouped[date];
     const tr = document.createElement('tr');
     const dateTd = document.createElement('td');
-    dateTd.textContent = new Date(date + 'T00:00:00').toLocaleDateString('en-US', { timeZone: 'America/Denver' });
+    // Use Asia/Manila timezone for daily summary dates
+    dateTd.textContent = new Date(date + 'T00:00:00').toLocaleDateString('en-US', { timeZone: 'Asia/Manila' });
     const qty69Td = document.createElement('td');
     qty69Td.textContent = summary.qty69;
     const qty99Td = document.createElement('td');
@@ -290,7 +292,8 @@ function renderSalesChart() {
   const records = getSalesRecords();
   const grouped = groupSalesByDate(records);
   const dates = Object.keys(grouped).sort();
-  const labels = dates.map(d => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { timeZone: 'America/Denver', month: 'short', day: 'numeric' }));
+  // Format labels using Asia/Manila timezone
+  const labels = dates.map(d => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' }));
   const totals = dates.map(d => grouped[d].total);
   // Destroy previous chart if exists
   if (salesChartInstance) {
@@ -326,7 +329,8 @@ function renderInventoryChart() {
   const records = getSalesRecords();
   const grouped = groupSalesByDate(records);
   const dates = Object.keys(grouped).sort();
-  const labels = dates.map(d => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { timeZone: 'America/Denver', month: 'short', day: 'numeric' }));
+  // Format labels using Asia/Manila timezone
+  const labels = dates.map(d => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' }));
   const qty69 = dates.map(d => grouped[d].qty69);
   const qty99 = dates.map(d => grouped[d].qty99);
   if (inventoryChartInstance) {
@@ -403,7 +407,10 @@ function handleRecordSale(e) {
       // This avoids timezone conversion issues (e.g. being off by one day) by working
       // directly with the date in the desired time zone.
       const now = new Date();
-      const dateKey = now.toLocaleDateString('en-CA', { timeZone: 'America/Denver' });
+      // Use Asia/Manila timezone to reflect the local Philippine time. The
+      // en-CA locale returns a YYYY-MM-DD string, and Asia/Manila ensures the
+      // date aligns with Philippines time rather than America/Denver.
+      const dateKey = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
   // Store record including paid amount
   addSaleRecord({ timestamp: now.toISOString(), price: price, quantity: quantity, paid: paid, dateKey: dateKey });
   // Reset form
@@ -451,7 +458,8 @@ function exportCSV() {
   }
   let csv = 'Date/Time,Price,Quantity,Paid,Total,Change\n';
   records.forEach(record => {
-    const date = new Date(record.timestamp).toLocaleString('en-US', { timeZone: 'America/Denver' });
+    // Format each record timestamp in Asia/Manila timezone to reflect PH time
+    const date = new Date(record.timestamp).toLocaleString('en-US', { timeZone: 'Asia/Manila' });
     const total = record.price * record.quantity;
     const paid = typeof record.paid === 'number' ? record.paid : '';
     const change = typeof record.paid === 'number' ? (record.paid - total) : '';
@@ -478,8 +486,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const todayEl = document.getElementById('today-date');
   if (todayEl) {
     const now = new Date();
-    const denverStr = now.toLocaleString('en-US', { timeZone: 'America/Denver', weekday:'long', month:'long', day:'numeric', year:'numeric' });
-    todayEl.textContent = denverStr;
+    // Format the current date in the Asia/Manila timezone so the dashboard
+    // reflects the Philippines (PH) locale instead of Denver. This displays
+    // the day of week, month, day and year in a human‑readable form.
+    const manilaStr = now.toLocaleString('en-US', { timeZone: 'Asia/Manila', weekday:'long', month:'long', day:'numeric', year:'numeric' });
+    todayEl.textContent = manilaStr;
   }
   // Set default date range inputs to last 7 days (optional)
   const startInput = document.getElementById('date-start');
