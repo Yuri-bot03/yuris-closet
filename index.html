@@ -172,6 +172,7 @@
                     <th>Quantity</th>
                     <th>Paid</th>
                     <th>Change</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -245,6 +246,31 @@
             </form>
           </div>
         </div>
+      </div>
+      <!-- Remove stock form -->
+      <div class="row g-3 mt-4">
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h6>Remove Stock</h6>
+            <form id="remove-stock-form" class="row g-2">
+              <div class="col-6">
+                <label for="remove-stock-price" class="form-label">Price</label>
+                <select id="remove-stock-price" class="form-select form-select-sm" required>
+                  <option value="69">69</option>
+                  <option value="99">99</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label for="remove-stock-qty" class="form-label">Qty</label>
+                <input type="number" id="remove-stock-qty" class="form-control form-control-sm" min="1" required>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-danger btn-sm mt-2 w-100">Remove Stock</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
       </div>
     </div>
   </div>
