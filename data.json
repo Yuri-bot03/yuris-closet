@@ -13,10 +13,17 @@
       "quantity": 1,
       "paid": 69,
       "dateKey": "2025-08-08"
+    },
+    {
+      "timestamp": "2025-08-08T01:39:54.592Z",
+      "price": 69,
+      "quantity": 1,
+      "paid": 69,
+      "dateKey": "2025-08-08"
     }
   ],
   "inventory250": 0,
   "inventory149": 2,
-  "inventory69": 48,
+  "inventory69": 47,
   "inventory99": 30
 }
