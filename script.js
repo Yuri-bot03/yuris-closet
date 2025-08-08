@@ -15,6 +15,27 @@ function setInventory(price, value) {
   localStorage.setItem(key, value);
 }
 
+    /**
+     * Map a sale price to the stock category price.  
+     *
+     * The business logic is:
+     *   - Any sale price greater than 99 should decrement from the 99‑peso stock.
+     *   - Sale prices greater than 69 but less than or equal to 99 should decrement
+     *     from the 69‑peso stock.  
+     *   - Prices less than or equal to 69 are treated as their own category.  
+     *
+     * This allows you to sell items at arbitrary prices while still tracking
+     * inventory against the closest base price tier (₱69 or ₱99).
+     *
+     * @param {number} price The price entered on the sale form.
+     * @returns {number} The inventory key price (69, 99, or the exact price if ≤69).
+     */
+    function mapPriceToStock(price) {
+      if (price > 99) return 99;
+      if (price > 69) return 69;
+      return price;
+    }
+
 function getSalesRecords() {
   const data = localStorage.getItem('salesRecords');
   return data ? JSON.parse(data) : [];
@@ -140,9 +161,12 @@ function deleteSaleByTimestamp(timestamp) {
   const index = records.findIndex(r => r.timestamp === timestamp);
   if (index === -1) return;
   const record = records[index];
-  // Restore inventory
-  const current = getInventory(record.price);
-  setInventory(record.price, current + record.quantity);
+      // Restore inventory to the mapped stock category. A sale at a price greater
+      // than 99 should replenish the 99 stock, and a sale >69 and ≤99 should
+      // replenish the 69 stock. Prices ≤69 replenish their own category.
+      const inventoryPrice = mapPriceToStock(record.price);
+      const current = getInventory(inventoryPrice);
+      setInventory(inventoryPrice, current + record.quantity);
   // Remove record
   records.splice(index, 1);
   localStorage.setItem('salesRecords', JSON.stringify(records));
@@ -371,11 +395,13 @@ function renderInventoryChart() {
 function handleAddStock(e) {
   e.preventDefault();
   // Allow custom prices; parse as float to support decimals
-  const price = parseFloat(document.getElementById('stock-price').value);
-  const quantity = parseInt(document.getElementById('stock-qty').value, 10);
-  if (quantity <= 0) return;
-  const current = getInventory(price);
-  setInventory(price, current + quantity);
+      const price = parseFloat(document.getElementById('stock-price').value);
+      const quantity = parseInt(document.getElementById('stock-qty').value, 10);
+      if (quantity <= 0) return;
+      // Map custom prices to base stock categories (see mapPriceToStock)
+      const inventoryPrice = mapPriceToStock(price);
+      const current = getInventory(inventoryPrice);
+      setInventory(inventoryPrice, current + quantity);
   // Reset form
   document.getElementById('stock-qty').value = 1;
   refreshDashboard();
@@ -390,18 +416,22 @@ function handleRecordSale(e) {
   const quantity = parseInt(document.getElementById('sale-qty').value, 10);
   const paid = parseFloat(document.getElementById('sale-paid').value);
   if (quantity <= 0) return;
-  const current = getInventory(price);
-  if (current < quantity) {
-    alert(`Not enough inventory for ₱${price}. Currently available: ${current}`);
-    return;
-  }
-  const total = price * quantity;
-  if (isNaN(paid) || paid < total) {
-    alert(`Insufficient amount received. Total is ₱${total}`);
-    return;
-  }
-  // Update inventory
-  setInventory(price, current - quantity);
+      // Determine which stock category this sale should decrement. Prices greater
+      // than 99 map to the 99 stock, prices between 69 (exclusive) and 99
+      // inclusive map to the 69 stock, and prices ≤69 map to themselves.
+      const inventoryPrice = mapPriceToStock(price);
+      const current = getInventory(inventoryPrice);
+      if (current < quantity) {
+        alert(`Not enough inventory for ₱${inventoryPrice}. Currently available: ${current}`);
+        return;
+      }
+      const total = price * quantity;
+      if (isNaN(paid) || paid < total) {
+        alert(`Insufficient amount received. Total is ₱${total}`);
+        return;
+      }
+      // Update inventory for the mapped stock category
+      setInventory(inventoryPrice, current - quantity);
       // Determine date key in America/Denver timezone.
       // Use toLocaleDateString with the "en-CA" locale which produces a YYYY-MM-DD string.
       // This avoids timezone conversion issues (e.g. being off by one day) by working
@@ -428,12 +458,14 @@ function handleRecordSale(e) {
 function handleRemoveStock(e) {
   e.preventDefault();
   // Extract values from the remove stock form
-  const price = parseFloat(document.getElementById('remove-stock-price').value);
-  const quantity = parseInt(document.getElementById('remove-stock-qty').value, 10);
-  // Ignore non-positive quantities
-  if (quantity <= 0) return;
-  const current = getInventory(price);
-  let newQty = current - quantity;
+      const price = parseFloat(document.getElementById('remove-stock-price').value);
+      const quantity = parseInt(document.getElementById('remove-stock-qty').value, 10);
+      // Ignore non-positive quantities
+      if (quantity <= 0) return;
+      // Map to base stock category
+      const inventoryPrice = mapPriceToStock(price);
+      const current = getInventory(inventoryPrice);
+      let newQty = current - quantity;
   // If the new quantity would be negative, ask for confirmation and clamp to zero
   if (newQty < 0) {
     if (!confirm(`Removing ${quantity} from ₱${price} inventory would result in negative stock. Set inventory to zero?`)) {
@@ -441,7 +473,7 @@ function handleRemoveStock(e) {
     }
     newQty = 0;
   }
-  setInventory(price, newQty);
+       setInventory(inventoryPrice, newQty);
   // Reset the form to a sensible default
   document.getElementById('remove-stock-qty').value = 1;
   refreshDashboard();
