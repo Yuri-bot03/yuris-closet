@@ -1,14 +1,17 @@
 // Yuri's Closet Admin Dashboard script
 
 // Utility functions to manage inventory and sales records in localStorage
+// Retrieve the current inventory level for a given price.
+// Inventory keys are stored dynamically based on the price, e.g. "inventory69", "inventory150", etc.
 function getInventory(price) {
-  const key = price === 69 ? 'inventory69' : 'inventory99';
+  const key = `inventory${price}`;
   const stored = localStorage.getItem(key);
   return stored ? parseInt(stored, 10) : 0;
 }
 
+// Set the inventory level for a given price. Values are stored as strings in localStorage.
 function setInventory(price, value) {
-  const key = price === 69 ? 'inventory69' : 'inventory99';
+  const key = `inventory${price}`;
   localStorage.setItem(key, value);
 }
 
@@ -117,11 +120,17 @@ async function saveRemoteData(dataObj) {
 
 // Synchronize local storage values to remote JSON
 async function syncToRemote() {
+  // Build a data object containing all dynamic inventory keys and salesRecords
   const dataObj = {
-    inventory69: getInventory(69),
-    inventory99: getInventory(99),
     salesRecords: getSalesRecords()
   };
+  // Collect all inventory keys from localStorage (those starting with "inventory")
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('inventory')) {
+      const value = parseInt(localStorage.getItem(key), 10) || 0;
+      dataObj[key] = value;
+    }
+  });
   await saveRemoteData(dataObj);
 }
 
@@ -145,9 +154,10 @@ function deleteSaleByTimestamp(timestamp) {
 
 // Ensure default values exist for inventory and sales
 function initializeStorage() {
-  if (localStorage.getItem('inventory69') === null) setInventory(69, 0);
-  if (localStorage.getItem('inventory99') === null) setInventory(99, 0);
-  if (localStorage.getItem('salesRecords') === null) localStorage.setItem('salesRecords', JSON.stringify([]));
+  // Ensure the salesRecords array exists. Inventory keys are created on demand
+  if (localStorage.getItem('salesRecords') === null) {
+    localStorage.setItem('salesRecords', JSON.stringify([]));
+  }
 }
 
 // Group sales by date and accumulate quantities and totals
@@ -356,7 +366,8 @@ function renderInventoryChart() {
 // Handle Add Stock form submission
 function handleAddStock(e) {
   e.preventDefault();
-  const price = parseInt(document.getElementById('stock-price').value, 10);
+  // Allow custom prices; parse as float to support decimals
+  const price = parseFloat(document.getElementById('stock-price').value);
   const quantity = parseInt(document.getElementById('stock-qty').value, 10);
   if (quantity <= 0) return;
   const current = getInventory(price);
@@ -371,7 +382,7 @@ function handleAddStock(e) {
 // Handle Record Sale form submission
 function handleRecordSale(e) {
   e.preventDefault();
-  const price = parseInt(document.getElementById('sale-price').value, 10);
+  const price = parseFloat(document.getElementById('sale-price').value);
   const quantity = parseInt(document.getElementById('sale-qty').value, 10);
   const paid = parseFloat(document.getElementById('sale-paid').value);
   if (quantity <= 0) return;
@@ -407,7 +418,7 @@ function handleRecordSale(e) {
 function handleRemoveStock(e) {
   e.preventDefault();
   // Extract values from the remove stock form
-  const price = parseInt(document.getElementById('remove-stock-price').value, 10);
+  const price = parseFloat(document.getElementById('remove-stock-price').value);
   const quantity = parseInt(document.getElementById('remove-stock-qty').value, 10);
   // Ignore non-positive quantities
   if (quantity <= 0) return;
@@ -494,16 +505,23 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const remote = await fetchRemoteData();
       if (remote) {
-        // Update local storage with remote data
-        setInventory(69, remote.inventory69 ?? 0);
-        setInventory(99, remote.inventory99 ?? 0);
-        localStorage.setItem('salesRecords', JSON.stringify(remote.salesRecords ?? []));
+        // For each inventory key in the remote data, update local storage
+        Object.keys(remote).forEach(key => {
+          if (key.startsWith('inventory')) {
+            const value = parseInt(remote[key], 10) || 0;
+            localStorage.setItem(key, value);
+          }
+        });
+        // Update salesRecords
+        if (Array.isArray(remote.salesRecords)) {
+          localStorage.setItem('salesRecords', JSON.stringify(remote.salesRecords));
+        }
       }
     } catch (err) {
       console.error('Error syncing from remote:', err);
     }
-  refreshDashboard();
-  // Sync updated values to remote
-  syncToRemote().catch(err => console.error('Sync error:', err));
+    refreshDashboard();
+    // Sync updated values to remote
+    syncToRemote().catch(err => console.error('Sync error:', err));
   })();
 });
