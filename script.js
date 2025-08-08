@@ -23,6 +23,108 @@ function addSaleRecord(record) {
   localStorage.setItem('salesRecords', JSON.stringify(records));
 }
 
+/*
+ * Remote persistence helpers
+ *
+ * To support synchronizing data across devices without a paid backend, we use
+ * GitHub itself as a simple data store. A file named `data.json` in this
+ * repository will hold the current inventory counts and sales records. At
+ * runtime, the dashboard fetches this file via the GitHub API. After any
+ * change (adding/removing stock or adding/deleting a sale) the dashboard
+ * updates the JSON and commits it back to the repository using the API.
+ *
+ * Because GitHub's API requires authentication, the user will be prompted
+ * once per browser session for a personal access token (PAT) with repo scope.
+ * The token is stored in localStorage and reused for subsequent requests.
+ *
+ * NOTE: The PAT grants write access to your repository. Only use this on
+ * trusted personal devices. Exposing the token publicly will allow anyone
+ * to modify your data.
+ */
+
+const GITHUB_OWNER = 'Yuri-bot03';
+const GITHUB_REPO = 'yuris-closet';
+const DATA_FILE_PATH = 'data.json';
+let remoteDataSha = null;
+
+// Retrieve the GitHub personal access token from localStorage or prompt
+async function getGithubToken() {
+  let token = localStorage.getItem('githubToken');
+  if (!token) {
+    token = prompt('Enter your GitHub personal access token (with repo scope) to enable syncing:');
+    if (token) {
+      localStorage.setItem('githubToken', token);
+    }
+  }
+  return token;
+}
+
+// Fetch data.json from the GitHub repository
+async function fetchRemoteData() {
+  const token = await getGithubToken();
+  if (!token) return null;
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`;
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `token ${token}`,
+      Accept: 'application/vnd.github+json'
+    }
+  });
+  if (res.status === 404) {
+    return null;
+  }
+  if (!res.ok) {
+    console.error('Failed to fetch remote data:', res.status, await res.text());
+    return null;
+  }
+  const data = await res.json();
+  remoteDataSha = data.sha;
+  const content = atob(data.content.replace(/\n/g, ''));
+  try {
+    return JSON.parse(content);
+  } catch (err) {
+    console.error('Failed to parse remote data:', err);
+    return null;
+  }
+}
+
+// Save updated data.json back to the GitHub repository
+async function saveRemoteData(dataObj) {
+  const token = await getGithubToken();
+  if (!token) return;
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`;
+  const content = btoa(JSON.stringify(dataObj, null, 2));
+  const body = {
+    message: 'Update data.json via dashboard',
+    content: content,
+    sha: remoteDataSha || undefined
+  };
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `token ${token}`,
+      Accept: 'application/vnd.github+json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    console.error('Failed to save remote data:', res.status, await res.text());
+    return;
+  }
+  const result = await res.json();
+  remoteDataSha = result.content.sha;
+}
+
+// Synchronize local storage values to remote JSON
+async function syncToRemote() {
+  const dataObj = {
+    inventory69: getInventory(69),
+    inventory99: getInventory(99),
+    salesRecords: getSalesRecords()
+  };
+  await saveRemoteData(dataObj);
+}
+
 // Delete a sale record by its timestamp and restore inventory
 function deleteSaleByTimestamp(timestamp) {
   const records = getSalesRecords();
@@ -37,6 +139,8 @@ function deleteSaleByTimestamp(timestamp) {
   localStorage.setItem('salesRecords', JSON.stringify(records));
   // Refresh the dashboard to reflect changes
   refreshDashboard();
+  // Sync updated values to remote
+  syncToRemote().catch(err => console.error('Sync error:', err));
 }
 
 // Ensure default values exist for inventory and sales
@@ -260,6 +364,8 @@ function handleAddStock(e) {
   // Reset form
   document.getElementById('stock-qty').value = 1;
   refreshDashboard();
+  // Sync updated values to remote
+  syncToRemote().catch(err => console.error('Sync error:', err));
 }
 
 // Handle Record Sale form submission
@@ -318,6 +424,8 @@ function handleRemoveStock(e) {
   // Reset the form to a sensible default
   document.getElementById('remove-stock-qty').value = 1;
   refreshDashboard();
+  // Sync updated values to remote
+  syncToRemote().catch(err => console.error('Sync error:', err));
 }
 
 // Export sales records to CSV
@@ -380,6 +488,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // Bind remove stock form if present
   const removeStockForm = document.getElementById('remove-stock-form');
   if (removeStockForm) removeStockForm.addEventListener('submit', handleRemoveStock);
-  // Initial render
+  // Load remote data and then render. If remote data is available, it will
+  // override local storage values; otherwise, local storage values persist.
+  (async () => {
+    try {
+      const remote = await fetchRemoteData();
+      if (remote) {
+        // Update local storage with remote data
+        setInventory(69, remote.inventory69 ?? 0);
+        setInventory(99, remote.inventory99 ?? 0);
+        localStorage.setItem('salesRecords', JSON.stringify(remote.salesRecords ?? []));
+      }
+    } catch (err) {
+      console.error('Error syncing from remote:', err);
+    }
   refreshDashboard();
+  // Sync updated values to remote
+  syncToRemote().catch(err => console.error('Sync error:', err));
+  })();
 });
