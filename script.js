@@ -31,8 +31,12 @@ function setInventory(price, value) {
      * @returns {number} The inventory key price (69, 99, or the exact price if ≤69).
      */
     function mapPriceToStock(price) {
-      if (price > 99) return 99;
-      if (price > 69) return 69;
+      // Map sale price to stock category for inventory adjustments.
+      // Prices equal to or above 99 should use the 99-peso stock.
+      // Prices strictly greater than 69 but less than 99 should use the 69-peso stock.
+      // Prices at or below 69 remain in their own category.
+      if (price >= 99) return 99;
+      if (price > 69 && price < 99) return 69;
       return price;
     }
 
@@ -192,8 +196,12 @@ function groupSalesByDate(records) {
     if (!summary[date]) {
       summary[date] = { qty69: 0, qty99: 0, total: 0 };
     }
-    if (record.price === 69) summary[date].qty69 += record.quantity;
-    if (record.price === 99) summary[date].qty99 += record.quantity;
+    // Determine which stock tier this sale belongs to for daily summary.
+    // Use the same mapping logic as inventory adjustments so that custom prices
+    // are aggregated under the appropriate base categories (69 or 99).
+    const inventoryPrice = mapPriceToStock(record.price);
+    if (inventoryPrice === 69) summary[date].qty69 += record.quantity;
+    if (inventoryPrice === 99) summary[date].qty99 += record.quantity;
     summary[date].total += record.price * record.quantity;
   });
   return summary;
