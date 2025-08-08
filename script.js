@@ -410,6 +410,11 @@ function handleRecordSale(e) {
   document.getElementById('sale-qty').value = 1;
   document.getElementById('sale-paid').value = '';
   refreshDashboard();
+  // Sync updated values to remote after recording a sale
+  // This ensures that new sales are persisted to data.json so other devices
+  // can retrieve the updated sales history. Without this call, sales would
+  // remain only in local storage and would not be visible on other devices.
+  syncToRemote().catch(err => console.error('Sync error:', err));
 }
 
 // Handle Remove Stock form submission
