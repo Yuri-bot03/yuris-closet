@@ -398,14 +398,12 @@ function handleRecordSale(e) {
   }
   // Update inventory
   setInventory(price, current - quantity);
-  // Determine date key in America/Denver timezone
-  const now = new Date();
-  const denverString = now.toLocaleString('en-US', { timeZone: 'America/Denver' });
-  const denverDate = new Date(denverString);
-  const year = denverDate.getFullYear();
-  const month = String(denverDate.getMonth() + 1).padStart(2, '0');
-  const day = String(denverDate.getDate()).padStart(2, '0');
-  const dateKey = `${year}-${month}-${day}`;
+      // Determine date key in America/Denver timezone.
+      // Use toLocaleDateString with the "en-CA" locale which produces a YYYY-MM-DD string.
+      // This avoids timezone conversion issues (e.g. being off by one day) by working
+      // directly with the date in the desired time zone.
+      const now = new Date();
+      const dateKey = now.toLocaleDateString('en-CA', { timeZone: 'America/Denver' });
   // Store record including paid amount
   addSaleRecord({ timestamp: now.toISOString(), price: price, quantity: quantity, paid: paid, dateKey: dateKey });
   // Reset form
