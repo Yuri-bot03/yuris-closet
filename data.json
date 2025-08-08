@@ -1,22 +1,7 @@
 {
-  "salesRecords": [
-    {
-      "timestamp": "2025-08-08T01:28:58.302Z",
-      "price": 69,
-      "quantity": 1,
-      "paid": 69,
-      "dateKey": "2025-08-08"
-    },
-    {
-      "timestamp": "2025-08-08T01:29:02.535Z",
-      "price": 69,
-      "quantity": 1,
-      "paid": 69,
-      "dateKey": "2025-08-08"
-    }
-  ],
+  "salesRecords": [],
   "inventory250": 0,
   "inventory149": 2,
-  "inventory69": 49,
+  "inventory69": 51,
   "inventory99": 30
 }
